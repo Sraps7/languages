@@ -111,4 +111,111 @@ long MyFunctionFoo(int, float);
 
 
 #### 函数模板
+```cpp
+template <typename AnyType>
+void Swap(AnyType &a, AnyType &b)
+{
+    AnyType temp;
+    temp = a;
+    a = b;
+    b = temp;
+}
+```
+第一行指出要建立一个模板，并将类型命名为AnyType
+关键字template和typename是必须的
+> **注：** typname可由class替换，因为在C98之前，是用class关键字的
+
+> 模板并不创建任何函数，只是告诉编译器如何定义函数。需要一个交换int的Swap函数时，编译器将按模板模式创建这样的函数。使用int代替AnyType
+
+
+#### 模板重载
+当需要多个对不同类型使用同一种算法的函数时，可使用模板
+然而，并非所有的数据类型都使用相同的算法，为满足这种需求，引入模板重载。
+```cpp
+template <typename T>
+void Swap(T &a, T &b);
+
+template <typename T>
+void Swap(T *a, T *b, int n);
+```
+
+##### 模板的局限性
+假设有如下模板函数：
+```cpp
+template <class T>
+void f(T a, T b)
+{...}
+```
+下面的语句假设定义了`>`，但如果T为结构类型，该假设不成立：
+```cpp
+if (a > b)
+```
+总之，编写的模板函数很可能无法处理某些类型。有两种解决方法：
+* 重载运算符
+* 为特定类型提供具体化的模板定义
+
+##### 显式具体化与显式实例化
+```cpp
+template void Swap<int>(int, int);   // 显式实例化，explicit instantiation
+template <> void Swap<int>(int &, int &);   // 显式具体化   explicit specialization
+template <> void Swap(int &, int &);        // 显式具体化   explicit specialization
+```
+对于上述代码，显式实例化，会使编译器使用Swap()模板生成一个使用int类型的实例。
+显式具体化的意思是：“不要使用Swap()模板生成函数定义，而是用专门为int类型显式地定义的函数定义”
+显式具体化声明在关键字template后包含<>, 而显式实例化没有。
+
+> 如果有多个函数原型，编译器在选择原型时，按照如下顺序查找：
+> 1. 非模板版本
+> 2. 显式具体化
+> 3. 模板版本
+
+> **注：**
+> 可以在程序中使用函数来创建显式实例化：
+> ```cpp
+> template <class T>
+> T Add(T a, T b)
+> {
+> return a+ b;
+> }
+> ...
+> int m = 6;
+> double x = 10.2;
+> cout << Add<double>(x, m) <<endl;   // explicit instantiation
+> ```
+> 这里的模板与函数调用Add(x,m)不匹配， 因为该模板要求两个函数参数的类型相同。但通过使用Add<double>(x,m),可强制为double类型实例化，并将参数m强制转换为double类型，以便与函数Add<double>(double, double)的第二个参数相匹配。
+
+#### 编译器选择哪个函数版本
+**重载解析**
+![重载解析](imgs/cp5_3.png)
+
+#### decltype
+```cpp
+template<class T1, class T2>
+void ft(T1 x, T2 y)
+{
+    ...
+    ?type? xpy = x + y;
+    ...
+}
+```
+在C++ 98中，一个问题是，并非总能知道应在声明中使用哪种类型。
+在上例中，T1可能是int，T2可能是double，没有办法知道xpy的类型
+
+> C++11 引入decltype关键字，解决这个问题
+```cpp
+int x;
+decltype(x) y;   // make y the same type as x
+```
+
+##### C++11 后置返回类型
+```cpp
+template<class T1, class T2>
+auto gt(T1 x, T2 y) -> decltype(x + y)
+{
+    ...
+    return x + y;
+}
+```
+decltype在参数声明后面，因此x和y位于作用域内，可以使用它们。
+auto是一个占位符，表示后置返回类型提供的类型，这是C++11 给auto新增的一种角色。
 
