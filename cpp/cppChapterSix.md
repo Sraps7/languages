@@ -36,3 +36,47 @@
 ##### 多个库的链接
 ![不同编译器之间的链接](imgs/cp6_2.png)
 
+#### extern
+对于具有外部链接性的变量，简称为外部变量，它们的存储持续性为静态，作用域为整个文件，可以在其他文件访问。
+
+##### 单定义规则
+一方面，在每个使用外部变量的文件中，都必须声明它；另一方面，C++有“单定义规则”，该规则要求变量只能被定义一次。为满足这种需求，C++提供了两种变量声明。
+* 定义声明： defining declaration；简称定义
+* 引用声明： referencing declaration； 简称声明
+> 引用声明不给变量分配存储空间，因为它引用已有的变量。
+引用声明使用关键字extern，且不进行初始化；否则，声明变为定义，导致分配存储空间：
+```cpp
+double up;         // definition, up is 0
+extern int blem;   // blem defined elsewhere
+extern char gr = 'z' // definition because initialized
+```
+
+如果要在多个文件中使用外部变量，只需要在一个文件中包含该变量的定义，但在使用该变量的其他所有文件中，都必须使用关键字extern声明它
+
+##### 作用域解析运算符`::`
+当全局变量被局部变量覆盖时，可使用作用域解析运算符得到全局变量
+```cpp
+cout << "Local warming = " << warming << endl;
+cout << "Global warming = " << ::warming << endl;
+```
+
+#### 静态局部变量
+静态局部变量只会被初始化一次
+
+#### const
+在C++中（但不是在C中），const限定符对默认存储类型稍有影响：
+在默认情况下，全局变量的链接性是外部的，但const全局变量的链接性是内部的。
+```cpp
+const int fingers = 10;    // same as static const int fingers = 10;
+int main(void)
+{...}
+```
+> 这使得我们可以在头文件中定义const常量，而不会违反单定义规则
+
+##### extern const
+![extern const](imgs/cp6_3.png)
+
+#### C++ 查找函数
+函数默认是外部链接的，除非声明为static，在原型与定义中都需要使用static关键字。
+![查找函数](imgs/cp6_4.png)
+
